@@ -253,10 +253,12 @@
           const contract = new Contract(address, TaikoL1, provider);
           contract.on(
             "BlockProven",
-            (id, parentHash, blockHash, prover, provenAt) => {
+            (id, parentHash, blockHash, prover, provenAt, ...args) => {
               // ignore oracle prover
               if (prover.toLowerCase() !== oracleProverAddress.toLowerCase()) {
-                onEvent(new Date(provenAt.toNumber() * 1000).toString());
+                if(!provenAt.eq(0)) {
+                  onEvent(new Date(provenAt.toNumber() * 1000).toString());
+                }
               }
             }
           );
@@ -357,12 +359,19 @@
 
 {#if proverDetailsOpen}
   <DetailsModal title={"Prover Details"} bind:isOpen={proverDetailsOpen}>
-    <div class="grid grid-cols-2 gap-4 text-center my-10" slot="body">
+    <div
+      class="grid grid-cols-2 gap-4 text-center my-10 max-h-96 overflow-y-auto"
+      slot="body"
+    >
       {#await getNumProvers(eventIndexerApiUrl) then provers}
         {#each provers.provers as prover}
-          <div>
+          <a
+            href="{l1ExplorerUrl}/address/{prover.address}"
+            target="_blank"
+            rel="noreferrer"
+          >
             {addressSubsection(prover.address)}
-          </div>
+          </a>
           <div>{prover.count}</div>
         {/each}
       {:catch error}

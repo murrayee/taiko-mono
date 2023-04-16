@@ -8,6 +8,8 @@ import { chains } from '../chain/chains';
 import { tokenVaults } from '../vault/tokenVaults';
 import type { ChainID } from '../domain/chain';
 
+const STORAGE_PREFIX = 'transactions';
+
 export class StorageService implements Transactioner {
   private readonly storage: Storage;
   private readonly providers: Record<
@@ -23,12 +25,9 @@ export class StorageService implements Transactioner {
     this.providers = providers;
   }
 
-  async getAllByAddress(
-    address: string,
-    chainID?: number,
-  ): Promise<BridgeTransaction[]> {
+  async getAllByAddress(address: string): Promise<BridgeTransaction[]> {
     const txs: BridgeTransaction[] = JSON.parse(
-      this.storage.getItem(`transactions-${address.toLowerCase()}`),
+      this.storage.getItem(`${STORAGE_PREFIX}-${address.toLowerCase()}`),
     );
 
     const bridgeTxs: BridgeTransaction[] = [];
@@ -150,7 +149,7 @@ export class StorageService implements Transactioner {
     hash: string,
   ): Promise<BridgeTransaction> {
     const txs: BridgeTransaction[] = JSON.parse(
-      this.storage.getItem(`transactions-${address.toLowerCase()}`),
+      this.storage.getItem(`${STORAGE_PREFIX}-${address.toLowerCase()}`),
     );
 
     const tx: BridgeTransaction = txs.find((tx) => tx.hash === hash);
@@ -255,7 +254,7 @@ export class StorageService implements Transactioner {
 
   updateStorageByAddress(address: string, txs: BridgeTransaction[]) {
     this.storage.setItem(
-      `transactions-${address.toLowerCase()}`,
+      `${STORAGE_PREFIX}-${address.toLowerCase()}`,
       JSON.stringify(txs),
     );
   }
